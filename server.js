@@ -39,7 +39,7 @@ app.get("/trending", (req, res) => {
       })
       .catch((error) => {
         console.error(error);
-        res.status(500).send("An error occurred while fetching trending movies.");
+        res.status(500).send("There was an error when fetching trending movies.");
     });
 });
 
