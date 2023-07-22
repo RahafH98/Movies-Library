@@ -2,8 +2,7 @@
 
 const express = require("express");
 
-
-
+const movieData = require("./MovieData/data.json");
 const cors = require("cors");
 
 const axios = require("axios");
@@ -13,11 +12,42 @@ const app = express();
 require("dotenv").config();
 
 app.use(cors());
+app.use(express.json());
 
+const PORT = process.env.PORT;
 
 app.get("/", handleHome);
 
-//this for the favorite
+const DB_URL = process.env.DATABASE_URL;
+const dbClient = new pg.Client(DB_URL);
+
+app.post("/addMovie", (req, res)=>{
+  let title = req.body.t;
+  let year = req.body.y;
+  let comments = req.body.c;
+
+  let sql = `insert into movies(title, year, comments) values($1,$2,$3)`;
+  dbClient.query(sql,[title,year,comments]).then(()=>{
+    res.status(201).send(`movie ${title} added to the database`)
+  })
+
+});
+
+
+app.get("/getMovies", (req, res)=>{
+  let sql = `SELECT * FROM movies`;
+  dbClient.query(sql).then((movieD)=>{
+    res.status(200).send(movieD.rows)
+  });
+});
+
+
+dbClient.connect().then(()=>{
+  app.listen(PORT, ()=>{
+    console.log(`Listening at ${PORT}`)
+  })
+});
+
 app.get("/favorite", favoriteHandeler);
 
 
@@ -43,7 +73,7 @@ app.get("/trending", (req, res) => {
     });
 });
 
-//create a GET request to search for a movie by name using the Movie DB API
+
 app.get("/search", (req, res) => {
     const searchTerm = req.query.query;
   
@@ -68,8 +98,7 @@ app.get("/search", (req, res) => {
     });
 });
 
-//adding 2 routes of your choice from the Movie DB API
-//1
+
 app.get("/upcoming", (req, res) => {
     axios
       .get(
@@ -92,7 +121,7 @@ app.get("/upcoming", (req, res) => {
     });
 });
 
-//2
+
 
 app.get("/popular", (req, res) => {
     axios
@@ -117,7 +146,7 @@ app.get("/popular", (req, res) => {
 });
   
 
-//this to handel the errors 
+
 app.get("*", errorHandeler);
 
 
