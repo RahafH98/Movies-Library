@@ -145,6 +145,38 @@ app.get("/popular", (req, res) => {
       });
 });
   
+app.put("/updateMovie/:id", (req, res) => {
+  let { id } = req.params;
+  let { newComment } = req.body;
+  let sql = `UPDATE movies SET comments = '${newComment}' WHERE id = ${id}`;
+  dbClient.query(sql)
+    .then((data) => {
+      res.status(200).send(`Updated`);
+    });
+});
+
+
+
+app.delete("/deleteMovie/:id", async (req, res) => {
+  let {id} = req.params;
+  let sql = `DELETE FROM movies WHERE id = ${id}`;
+  await dbClient.query(sql);
+  res.status(200).send('deleted from the database');
+});
+
+app.get("/getMoviesById/:id", (req, res)=>{
+  let {id} = req.params;
+  let sql = `SELECT * FROM movies WHERE id=${id}`;
+  dbClient.query(sql)
+  .then((data) => res.status(200).send(data.rows));
+});
+
+
+
+
+
+
+
 
 
 app.get("*", errorHandeler);
@@ -183,7 +215,7 @@ function errorHandeler(req, res){
 
 
 
-// starting the server handler
+
 app.listen(3000, startingLog);
 
 function startingLog(req, res) {
